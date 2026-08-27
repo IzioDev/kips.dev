@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found · {{ config.extra.proposal_plural }}.dev{% endblock title %}
+
+{% block content %}
+  <section class="not-found shell">
+    <p class="eyebrow">404</p>
+    <h1>That document is not here.</h1>
+    <p>The proposal may have moved, or the number may not exist.</p>
+    <a class="button-secondary" href="/">Browse {{ config.extra.proposal_plural }}</a>
+  </section>
+{% endblock content %}
+

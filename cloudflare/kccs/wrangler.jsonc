@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "kccs-dev",
+  "pages_build_output_dir": "../../dist/kccs",
+  "compatibility_date": "2026-08-27",
+  "send_metrics": false
+}

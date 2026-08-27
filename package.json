@@ -1,0 +1,22 @@
+{
+  "name": "kaspa-proposals-sites",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Pages deployment tooling for kips.dev and kccs.dev",
+  "scripts": {
+    "generate": "cargo run --locked --release",
+    "index:kips": "zola --root .generated/kips build --force && tinysearch --release -m wasm -p .generated/kips/static/tinysearch .generated/kips/public/search_index.en.json",
+    "index:kccs": "zola --root .generated/kccs build --force && tinysearch --release -m wasm -p .generated/kccs/static/tinysearch .generated/kccs/public/search_index.en.json",
+    "serve:kips": "zola --root .generated/kips serve --port 1111",
+    "serve:kccs": "zola --root .generated/kccs serve --port 1112",
+    "preview:kips": "npm run generate && npm run index:kips && npm run serve:kips",
+    "preview:kccs": "npm run generate && npm run index:kccs && npm run serve:kccs",
+    "preview:cloudflare:kips": "wrangler pages dev --cwd cloudflare/kips",
+    "preview:cloudflare:kccs": "wrangler pages dev --cwd cloudflare/kccs",
+    "deploy:kips": "wrangler pages deploy --cwd cloudflare/kips --branch=master",
+    "deploy:kccs": "wrangler pages deploy --cwd cloudflare/kccs --branch=master"
+  },
+  "devDependencies": {
+    "wrangler": "4.127.0"
+  }
+}

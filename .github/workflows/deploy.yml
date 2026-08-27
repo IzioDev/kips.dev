@@ -1,0 +1,158 @@
+name: Build and deploy proposal sites
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: kaspa-proposal-sites-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out this site
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.96.0
+          components: clippy,rustfmt
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: cargo-deps-v1-${{ runner.os }}-${{ runner.arch }}-rust-1.96.0-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-deps-v1-${{ runner.os }}-${{ runner.arch }}-rust-1.96.0-
+
+      - name: Cache production Rust outputs
+        uses: actions/cache@v4
+        with:
+          path: target/
+          key: cargo-target-v1-${{ runner.os }}-${{ runner.arch }}-rust-1.96.0-site-build-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'rust-toolchain.toml', 'src/**/*.rs') }}
+          restore-keys: |
+            cargo-target-v1-${{ runner.os }}-${{ runner.arch }}-rust-1.96.0-site-build-
+
+      - name: Cache pinned site tools
+        id: site-tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.install-action/bin/zola
+            ~/.cargo/bin/tinysearch
+          key: site-tools-v1-${{ runner.os }}-${{ runner.arch }}-zola-0.23.4-tinysearch-0.11.0-rust-1.96.0
+
+      - name: Add cached site tools to PATH
+        shell: bash
+        run: echo "$HOME/.install-action/bin" >> "$GITHUB_PATH"
+
+      - name: Install Zola
+        if: steps.site-tools.outputs.cache-hit != 'true'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: zola@0.23.4
+
+      - name: Install Tinysearch
+        if: steps.site-tools.outputs.cache-hit != 'true'
+        run: cargo install tinysearch --version 0.11.0 --locked --features bin
+
+      - name: Install Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install deployment tooling
+        run: npm ci
+
+      - name: Select source cache generation
+        id: source-cache
+        shell: bash
+        run: echo "week=$(date -u +'%G-%V')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache upstream proposal checkouts
+        uses: actions/cache@v4
+        with:
+          path: .sources/
+          key: proposal-sources-v1-${{ runner.os }}-${{ steps.source-cache.outputs.week }}
+          restore-keys: |
+            proposal-sources-v1-${{ runner.os }}-
+
+      - name: Test the importer
+        run: cargo test --locked
+
+      - name: Import current proposals
+        run: cargo run --locked --release
+
+      - name: Build both static sites
+        run: |
+          zola --root .generated/kips build --force --output-dir "$GITHUB_WORKSPACE/dist/kips"
+          zola --root .generated/kccs build --force --output-dir "$GITHUB_WORKSPACE/dist/kccs"
+          tinysearch --release -m wasm -p dist/kips/tinysearch dist/kips/search_index.en.json
+          tinysearch --release -m wasm -p dist/kccs/tinysearch dist/kccs/search_index.en.json
+          rm -f dist/kips/search_index.en.json dist/kips/tinysearch.toml
+          rm -f dist/kccs/search_index.en.json dist/kccs/tinysearch.toml
+
+      - name: Fingerprint source revisions
+        id: fingerprint
+        shell: bash
+        run: |
+          digest="$({
+            git rev-parse HEAD
+            git -C .sources/kips rev-parse HEAD
+            git -C .sources/kccs rev-parse HEAD
+          } | sha256sum | cut -d ' ' -f 1)"
+          echo "cache_key=cloudflare-pages-v2-${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether this exact output was deployed
+        id: deploy-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .deploy-marker
+          key: ${{ steps.fingerprint.outputs.cache_key }}
+          lookup-only: true
+
+      - name: Deploy kips.dev
+        if: github.event_name != 'pull_request' && steps.deploy-cache.outputs.cache-hit != 'true'
+        run: npm run deploy:kips
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy kccs.dev
+        if: github.event_name != 'pull_request' && steps.deploy-cache.outputs.cache-hit != 'true'
+        run: npm run deploy:kccs
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Remember successful deployment
+        if: github.event_name != 'pull_request' && steps.deploy-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p .deploy-marker
+          printf '%s\n' "${{ steps.fingerprint.outputs.cache_key }}" > .deploy-marker/output
+
+      - name: Save deployment fingerprint
+        if: github.event_name != 'pull_request' && steps.deploy-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .deploy-marker
+          key: ${{ steps.fingerprint.outputs.cache_key }}
