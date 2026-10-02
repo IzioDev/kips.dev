@@ -164,12 +164,18 @@ jobs:
       - name: Import current proposals
         run: cargo run --locked --release
 
+      - name: Install Node for SEO checks
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
       - name: Build both static sites
         run: |
           zola --root .generated/kips build --force --output-dir "$GITHUB_WORKSPACE/dist/kips"
           zola --root .generated/kccs build --force --output-dir "$GITHUB_WORKSPACE/dist/kccs"
           tinysearch --release -m wasm -p dist/kips/tinysearch dist/kips/search_index.en.json
           tinysearch --release -m wasm -p dist/kccs/tinysearch dist/kccs/search_index.en.json
+          node scripts/check-seo.mjs
           rm -f dist/kips/search_index.en.json dist/kips/tinysearch.toml
           rm -f dist/kccs/search_index.en.json dist/kccs/tinysearch.toml
 
@@ -182,7 +188,7 @@ jobs:
           test -s dist/kccs/tinysearch/tinysearch_engine.wasm
           test ! -e dist/kips/search_index.en.json
           test ! -e dist/kccs/search_index.en.json
-          grep -q 'href=/1/' dist/kips/index.html
-          grep -q 'href=/0/' dist/kccs/index.html
+          grep -q 'href=/kip-1-kaspa-rust-rewrite/' dist/kips/index.html
+          grep -q 'href=/kcc-0-purpose-and-guidelines/' dist/kccs/index.html
           grep -q 'https://kccs.dev' dist/kips/index.html
           grep -q 'https://kips.dev' dist/kccs/index.html

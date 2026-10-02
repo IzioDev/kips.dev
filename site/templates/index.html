@@ -1,130 +1,202 @@
-{% extends "base.html" %}
-
-{% block content %}
-  <section class="hero shell">
+{% extends "base.html" %} {% block head_extra %}
+<script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","name":{{<seo.json value={config.extra.proposal_plural ~ ".dev"} />}},"alternateName":{{<seo.json value={config.extra.long_name} />}},"url":{{<seo.json value={current_url} />}},"description":{{<seo.json value={config.description} />}},"inLanguage":"en"}
+</script>
+{% endblock head_extra %} {% block content %}
+<section class="hero shell">
     <div class="hero-copy">
-      <h1>{{ config.extra.long_name }}</h1>
-      <p class="hero-summary">{{ section.description }}</p>
+        <h1>
+            {{ config.extra.long_name }} ({{ config.extra.proposal_plural }})
+        </h1>
+        <p class="hero-summary">{{ section.description }}</p>
     </div>
-  </section>
+</section>
 
-  <section class="catalog shell" aria-labelledby="catalog-title">
+<section class="catalog shell" aria-labelledby="catalog-title">
     <div class="catalog-heading">
-      <h2 id="catalog-title">Browse</h2>
-      <p class="keyboard-hint"><kbd>/</kbd> to search</p>
+        <h2 id="catalog-title">Browse</h2>
+        <p class="keyboard-hint"><kbd>/</kbd> to search</p>
     </div>
 
     <div class="search-wrap">
-      <label class="search-field" for="search-input">
-        <span class="search-label">Search</span>
-        <input
-          id="search-input"
-          type="search"
-          autocomplete="off"
-          placeholder="Search titles, authors, layers, or document content"
-        >
-      </label>
-      <div class="search-results" aria-live="polite" hidden>
-        <p class="search-results-label">Full-text matches</p>
-        <ol class="search-results-list"></ol>
-      </div>
+        <label class="search-field" for="search-input">
+            <span class="search-label">Search</span>
+            <input
+                id="search-input"
+                type="search"
+                autocomplete="off"
+                placeholder="Search titles, authors, layers, or document content"
+            />
+        </label>
+        <div class="search-results" aria-live="polite" hidden>
+            <p class="search-results-label">Full-text matches</p>
+            <ol class="search-results-list"></ol>
+        </div>
     </div>
 
     <div class="filters" aria-label="Filter proposals">
-      <label>
-        <span>Status</span>
-        <select id="status-filter">
-          <option value="">All statuses</option>
-          {% for status in section.extra.statuses %}
-            <option value="{{ status | lower }}">{{ status }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      {% if section.extra.facets %}
         <label>
-          <span>{{ config.extra.facet_label }}</span>
-          <select id="facet-filter">
-            <option value="">
-              {% if config.extra.proposal_kind == "KCC" %}All types / categories{% else %}All layers{% endif %}
-            </option>
-            {% for facet in section.extra.facets %}
-              <option value="{{ facet | lower }}">{{ facet }}</option>
-            {% endfor %}
-          </select>
+            <span>Status</span>
+            <select id="status-filter">
+                <option value="">All statuses</option>
+                {% for status in section.extra.statuses %}
+                <option value="{{ status | lower }}">{{ status }}</option>
+                {% endfor %}
+            </select>
         </label>
-      {% endif %}
-      <p class="result-count" aria-live="polite">
-        <strong id="visible-count">{{ section.extra.proposal_count }}</strong>
-        <span id="count-label">documents</span>
-      </p>
+        {% if section.extra.facets %}
+        <label>
+            <span>{{ config.extra.facet_label }}</span>
+            <select id="facet-filter">
+                <option value="">
+                    {% if config.extra.proposal_kind == "KCC" %}All types /
+                    categories{% else %}All layers{% endif %}
+                </option>
+                {% for facet in section.extra.facets %}
+                <option value="{{ facet | lower }}">{{ facet }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        {% endif %}
+        <p class="result-count" aria-live="polite">
+            <strong id="visible-count"
+                >{{ section.extra.proposal_count }}</strong
+            >
+            <span id="count-label">documents</span>
+        </p>
     </div>
 
-    <div class="proposal-table" role="table" aria-label="{{ config.extra.proposal_plural }}">
-      <div class="proposal-table-head" role="row">
-        <span role="columnheader">No.</span>
-        <span role="columnheader">Title</span>
-        <span role="columnheader">{{ config.extra.facet_label }}</span>
-        <span role="columnheader">Status</span>
-      </div>
-      <div class="proposal-list">
-        {% for page in section.pages %}
-          {% if not page.extra.is_companion %}
+    <div
+        class="proposal-table"
+        role="table"
+        aria-label="{{ config.extra.proposal_plural }}"
+    >
+        <div class="proposal-table-head" role="row">
+            <span role="columnheader">No.</span>
+            <span role="columnheader">Title</span>
+            <span role="columnheader">{{ config.extra.facet_label }}</span>
+            <span role="columnheader">Status</span>
+        </div>
+        <div class="proposal-list">
+            {% for page in section.pages %} {% if not page.extra.is_companion %}
             <div
-              class="proposal-row"
-              role="row"
-              data-status="{{ page.extra.status | lower }}"
-              data-facets="{{ page.extra.facets | join(sep=', ') | lower }}"
-              data-search="{{ page.extra.label }} {{ page.extra.short_title }} {{ page.description }} {% for author in page.extra.authors %}{{ author.raw }} {% endfor %}{{ page.extra.status }} {{ page.extra.facets | join(sep=', ') }}"
+                class="proposal-row"
+                role="row"
+                data-status="{{ page.extra.status | lower }}"
+                data-facets="{{ page.extra.facets | join(sep=', ') | lower }}"
+                data-search="{{ page.extra.label }} {{ page.extra.short_title }} {{ page.description }} {% for author in page.extra.authors %}{{ author.raw }} {% endfor %}{{ page.extra.status }} {{ page.extra.facets | join(sep=', ') }}"
             >
-              <span class="proposal-number" role="cell">{{ page.extra.number }}</span>
-              <span class="proposal-title" role="cell">
-                <strong>
-                  <a class="proposal-row-link" href="{{ page.path }}">{{ page.extra.short_title }}</a>
-                </strong>
-                <small class="author-list proposal-authors">
-                  {% for author in page.extra.authors %}
-                    <span class="author-item">
-                    {% if author.email or author.username %}
-                      <span class="author-disclosure">
-                      <button
-                        class="author-trigger"
-                        type="button"
-                        aria-expanded="false"
-                        aria-describedby="table-author-{{ page.extra.number }}-{{ loop.index0 }}"
-                        aria-label="Show contact details for {{ author.name }}"
-                      >{{ author.name }}</button>
-                      <span class="author-tooltip" id="table-author-{{ page.extra.number }}-{{ loop.index0 }}" role="tooltip">
-                        {% if author.username %}
-                          <span><span class="author-contact-label">Username</span>{{ author.username }}</span>
-                        {% endif %}
-                        {% if author.email %}
-                          <span><span class="author-contact-label">Email</span>{{ author.email }}</span>
-                        {% endif %}
-                      </span>
-                      </span>
-                    {% else %}
-                      <span class="author-name">{{ author.name }}</span>
-                    {% endif %}
-                    {% if not loop.last %}<span aria-hidden="true">,</span>{% endif %}
-                    </span>
-                  {% endfor %}
-                </small>
-              </span>
-              <span class="proposal-facets" role="cell">
-                {% if page.extra.facets %}
-                  {{ page.extra.facets | join(sep=', ') }}
-                {% else %}
-                  —
-                {% endif %}
-              </span>
-              <span class="status-badge" data-status-key="{{ page.extra.status_key }}" role="cell">
-                {{ page.extra.status }}
-              </span>
+                <span class="proposal-number" role="cell"
+                    >{{ page.extra.number }}</span
+                >
+                <span class="proposal-title" role="cell">
+                    <strong>
+                        <a class="proposal-row-link" href="{{ page.path }}"
+                            >{{ page.extra.label }}: {{ page.extra.short_title
+                            }}</a
+                        >
+                    </strong>
+                    <small class="author-list proposal-authors">
+                        {% for author in page.extra.authors %}
+                        <span class="author-item">
+                            {% if author.email or author.username %}
+                            <span class="author-disclosure">
+                                <button
+                                    class="author-trigger"
+                                    type="button"
+                                    aria-expanded="false"
+                                    aria-describedby="table-author-{{ page.extra.number }}-{{ loop.index0 }}"
+                                    aria-label="Show contact details for {{ author.name }}"
+                                >
+                                    {{ author.name }}
+                                </button>
+                                <span
+                                    class="author-tooltip"
+                                    id="table-author-{{ page.extra.number }}-{{ loop.index0 }}"
+                                    role="tooltip"
+                                >
+                                    {% if author.username %}
+                                    <span
+                                        ><span class="author-contact-label"
+                                            >Username</span
+                                        >{{ author.username }}</span
+                                    >
+                                    {% endif %} {% if author.email %}
+                                    <span
+                                        ><span class="author-contact-label"
+                                            >Email</span
+                                        >{{ author.email }}</span
+                                    >
+                                    {% endif %}
+                                </span>
+                            </span>
+                            {% else %}
+                            <span class="author-name">{{ author.name }}</span>
+                            {% endif %} {% if not loop.last %}<span
+                                aria-hidden="true"
+                                >,</span
+                            >{% endif %}
+                        </span>
+                        {% endfor %}
+                    </small>
+                </span>
+                <span class="proposal-facets" role="cell">
+                    {% if page.extra.facets %} {{ page.extra.facets |
+                    join(sep=', ') }} {% else %} — {% endif %}
+                </span>
+                <span
+                    class="status-badge"
+                    data-status-key="{{ page.extra.status_key }}"
+                    role="cell"
+                >
+                    {{ page.extra.status }}
+                </span>
             </div>
-          {% endif %}
-        {% endfor %}
-      </div>
-      <p class="empty-state" hidden>No documents match these filters.</p>
+            {% endif %} {% endfor %}
+        </div>
+        <p class="empty-state" hidden>No documents match these filters.</p>
     </div>
-  </section>
+</section>
+
+<section class="collection-guide shell" aria-labelledby="about-collection">
+    <h2 id="about-collection">What are {{ config.extra.proposal_plural }}?</h2>
+    {% if config.extra.proposal_kind == "KIP" %}
+    <p>
+        A Kaspa Improvement Proposal (KIP) documents a proposed change or
+        specification for the Kaspa network. Topics include consensus rules,
+        node behavior, network upgrades, and client APIs. This collection lets
+        you read the technical documents and compare their recorded statuses.
+    </p>
+    <h2>KIPs and KCCs</h2>
+    <p>
+        KIPs cover protocol development.
+        <a href="{{ config.extra.counterpart_url }}"
+            >Kaspa Calls for Conventions (KCCs)</a
+        >
+        describe shared conventions for applications, covenants, assets,
+        wallets, and other ecosystem tools.
+    </p>
+    {% else %}
+    <p>
+        A Kaspa Call for a Convention (KCC) describes a shared convention around
+        which independent ecosystem implementations can converge. Subjects
+        include covenant concepts, Program ABIs, authority schemes, and
+        fungible-token covenants.
+    </p>
+    <h2>KCCs and KIPs</h2>
+    <p>
+        KCCs support interoperability between applications and tools. Changes to
+        consensus or core-node behavior belong in
+        <a href="{{ config.extra.counterpart_url }}"
+            >Kaspa Improvement Proposals (KIPs)</a
+        >.
+    </p>
+    {% for document in section.pages %}{% if document.extra.number == 0 and not
+    document.extra.is_companion %}
+    <p>
+        For submission and review, read
+        <a href="{{ document.path }}">KCC 0: Purpose and Guidelines</a>.
+    </p>
+    {% endif %}{% endfor %} {% endif %}
+</section>
 {% endblock content %}

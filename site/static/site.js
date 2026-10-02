@@ -195,8 +195,8 @@
 
   const proposalPath = (value) => {
     const path = new URL(value, location.origin).pathname;
-    const match = path.match(/^\/(\d+)(?:\/|$)/);
-    return match ? `/${match[1]}/` : "";
+    return rows.map((row) => row.dataset.baseHref)
+      .find((base) => base && path.startsWith(base)) || "";
   };
 
   const filterRows = () => {

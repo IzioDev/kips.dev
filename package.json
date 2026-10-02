@@ -4,6 +4,7 @@
   "private": true,
   "description": "Cloudflare Pages deployment tooling for kips.dev and kccs.dev",
   "scripts": {
+    "check:seo": "node scripts/check-seo.mjs",
     "generate": "cargo run --locked --release",
     "index:kips": "zola --root .generated/kips build --force && tinysearch --release -m wasm -p .generated/kips/static/tinysearch .generated/kips/public/search_index.en.json",
     "index:kccs": "zola --root .generated/kccs build --force && tinysearch --release -m wasm -p .generated/kccs/static/tinysearch .generated/kccs/public/search_index.en.json",

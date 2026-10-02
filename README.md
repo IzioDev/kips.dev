@@ -5,8 +5,6 @@ Two sober, fast references for the Kaspa proposal repositories:
 - **[kips.dev](https://kips.dev)** presents Kaspa Improvement Proposals.
 - **[kccs.dev](https://kccs.dev)** presents Kaspa Calls for Conventions.
 
-Canonical documents get short, shareable URLs, a searchable index, readable proposal pages, status and category filters, companion-document support, and links back to their source. The two sites share one design and explicitly link to one another.
-
 ## Architecture
 
 The build stays deliberately small:

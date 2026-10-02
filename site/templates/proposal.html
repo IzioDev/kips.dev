@@ -1,161 +1,211 @@
-{% extends "base.html" %}
-
-{% block title %}{{ page.title }} · {{ config.extra.proposal_plural }}.dev{% endblock title %}
-{% block description %}{{ page.description }}{% endblock description %}
-{% block og_title %}{{ page.title }}{% endblock og_title %}
-{% block og_description %}{{ page.description }}{% endblock og_description %}
-{% block head_extra %}
-  <link rel="stylesheet" href="/vendor/katex/katex.min.css">
-  <script defer src="/vendor/katex/katex.min.js"></script>
-  <script defer src="/vendor/katex/auto-render.min.js"></script>
-{% endblock head_extra %}
-
-{% block content %}
-  <div class="shell document-shell">
+{% extends "base.html" %} {% block title %}{{ page.title }} | Kaspa {{
+config.extra.proposal_plural }}{% endblock title %} {% block og_type %}article{%
+endblock og_type %} {% block description %}{{ page.description }}{% endblock
+description %} {% block og_title %}{{ page.title }}{% endblock og_title %} {%
+block og_description %}{{ page.description }}{% endblock og_description %} {%
+block head_extra %}
+<script type="application/ld+json">
+    {"@context":"https://schema.org","@graph":[
+      {"@type":"TechArticle","headline":{{<seo.json value={page.title} />}},"description":{{<seo.json value={page.description} />}},"url":{{<seo.json value={current_url} />}},"inLanguage":"en","isBasedOn":{{<seo.json value={page.extra.source_url} />}},"author":[{% for author in page.extra.authors %}{"@type":"Person","name":{{<seo.json value={author.name} />}}}{% if not loop.last %},{% endif %}{% endfor %}]{% if page.date %},"datePublished":{{<seo.json value={page.date} />}}{% endif %}{% if page.updated %},"dateModified":{{<seo.json value={page.updated} />}}{% endif %}},
+      {"@type":"BreadcrumbList","itemListElement":[
+        {"@type":"ListItem","position":1,"name":{{<seo.json value={config.extra.long_name} />}},"item":{{<seo.json value={config.base_url ~ "/"} />}}},
+        {% if page.extra.is_companion %}{"@type":"ListItem","position":2,"name":{{<seo.json value={page.extra.label} />}},"item":{{<seo.json value={config.base_url ~ page.extra.parent_url} />}}},{% endif %}
+        {"@type":"ListItem","position":{% if page.extra.is_companion %}3{% else %}2{% endif %},"name":{{<seo.json value={page.title} />}},"item":{{<seo.json value={current_url} />}}}
+      ]}
+    ]}
+</script>
+<link rel="stylesheet" href="/vendor/katex/katex.min.css" />
+<script defer src="/vendor/katex/katex.min.js"></script>
+<script defer src="/vendor/katex/auto-render.min.js"></script>
+{% endblock head_extra %} {% block content %}
+<div class="shell document-shell">
     <nav class="document-back" aria-label="Breadcrumb">
-      <a href="/">All {{ config.extra.proposal_plural }}</a>
-      <span aria-hidden="true">/</span>
-      {% if page.extra.is_companion %}
+        <a href="/">All {{ config.extra.proposal_plural }}</a>
+        <span aria-hidden="true">/</span>
+        {% if page.extra.is_companion %}
         <a href="{{ page.extra.parent_url }}">{{ page.extra.label }}</a>
         <span aria-hidden="true">/</span>
         <span>Companion</span>
-      {% else %}
+        {% else %}
         <span>{{ page.extra.label }}</span>
-      {% endif %}
+        {% endif %}
     </nav>
 
     <header class="document-header">
-      {% if page.extra.is_companion %}
+        {% if page.extra.is_companion %}
         <div class="document-labels">
-          <span class="quiet-badge">Companion</span>
+            <span class="quiet-badge">Companion</span>
         </div>
-      {% endif %}
-      <h1>{{ page.extra.short_title }}</h1>
-      {% if page.description %}<p class="document-description">{{ page.description }}</p>{% endif %}
-
-      {% if page.extra.requirement_labels %}
+        {% endif %}
+        <h1>{{ page.title }}</h1>
+        {% if page.description %}
+        <p class="document-description">{{ page.description }}</p>
+        {% endif %} {% if page.extra.requirement_labels %}
         <div class="requirements" aria-label="Dependencies">
-          <span>Requires</span>
-          {% for requirement in page.extra.requirement_labels %}
-            <a href="{{ page.extra.requirement_urls[loop.index0] }}">{{ requirement }}</a>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <dl class="document-meta">
-        <div>
-          <dt>Authors</dt>
-          <dd class="author-list">
-            {% for author in page.extra.authors %}
-              <span class="author-item">
-              {% if author.email or author.username %}
-                <span class="author-disclosure">
-                  <button
-                    class="author-trigger"
-                    type="button"
-                    aria-expanded="false"
-                    aria-describedby="detail-author-{{ page.extra.number }}-{{ loop.index0 }}"
-                    aria-label="Show contact details for {{ author.name }}"
-                  >{{ author.name }}</button>
-                  <span class="author-tooltip" id="detail-author-{{ page.extra.number }}-{{ loop.index0 }}" role="tooltip">
-                    {% if author.username %}
-                      <span><span class="author-contact-label">Username</span>{{ author.username }}</span>
-                    {% endif %}
-                    {% if author.email %}
-                      <span><span class="author-contact-label">Email</span>{{ author.email }}</span>
-                    {% endif %}
-                  </span>
-                </span>
-              {% else %}
-                <span class="author-name">{{ author.name }}</span>
-              {% endif %}
-              {% if not loop.last %}<span aria-hidden="true">,</span>{% endif %}
-              </span>
+            <span>Requires</span>
+            {% for requirement in page.extra.requirement_labels %}
+            <a href="{{ page.extra.requirement_urls[loop.index0] }}"
+                >{{ requirement }}</a
+            >
             {% endfor %}
-          </dd>
         </div>
-        {% if page.extra.facets %}
-          <div>
-            <dt>{{ config.extra.facet_label }}</dt>
-            <dd>{{ page.extra.facets | join(sep=', ') }}</dd>
-          </div>
         {% endif %}
-        {% if page.extra.created %}
-          <div>
-            <dt>Created</dt>
-            <dd>{{ page.extra.created }}</dd>
-          </div>
-        {% endif %}
-        {% if page.extra.updated %}
-          <div>
-            <dt>Updated</dt>
-            <dd>{{ page.extra.updated }}</dd>
-          </div>
-        {% endif %}
-        <div>
-          <dt>Status</dt>
-          <dd>{{ page.extra.status }}</dd>
-        </div>
-      </dl>
 
-      <div class="document-actions">
-        <a class="button-secondary" href="{{ page.extra.source_url }}">View canonical source</a>
-        <button class="button-secondary copy-link" type="button">Copy link</button>
-      </div>
+        <dl class="document-meta">
+            <div>
+                <dt>Authors</dt>
+                <dd class="author-list">
+                    {% for author in page.extra.authors %}
+                    <span class="author-item">
+                        {% if author.email or author.username %}
+                        <span class="author-disclosure">
+                            <button
+                                class="author-trigger"
+                                type="button"
+                                aria-expanded="false"
+                                aria-describedby="detail-author-{{ page.extra.number }}-{{ loop.index0 }}"
+                                aria-label="Show contact details for {{ author.name }}"
+                            >
+                                {{ author.name }}
+                            </button>
+                            <span
+                                class="author-tooltip"
+                                id="detail-author-{{ page.extra.number }}-{{ loop.index0 }}"
+                                role="tooltip"
+                            >
+                                {% if author.username %}
+                                <span
+                                    ><span class="author-contact-label"
+                                        >Username</span
+                                    >{{ author.username }}</span
+                                >
+                                {% endif %} {% if author.email %}
+                                <span
+                                    ><span class="author-contact-label"
+                                        >Email</span
+                                    >{{ author.email }}</span
+                                >
+                                {% endif %}
+                            </span>
+                        </span>
+                        {% else %}
+                        <span class="author-name">{{ author.name }}</span>
+                        {% endif %} {% if not loop.last %}<span
+                            aria-hidden="true"
+                            >,</span
+                        >{% endif %}
+                    </span>
+                    {% endfor %}
+                </dd>
+            </div>
+            {% if page.extra.facets %}
+            <div>
+                <dt>{{ config.extra.facet_label }}</dt>
+                <dd>{{ page.extra.facets | join(sep=', ') }}</dd>
+            </div>
+            {% endif %} {% if page.extra.created %}
+            <div>
+                <dt>Created</dt>
+                <dd>{{ page.extra.created }}</dd>
+            </div>
+            {% endif %} {% if page.extra.updated %}
+            <div>
+                <dt>Updated</dt>
+                <dd>{{ page.extra.updated }}</dd>
+            </div>
+            {% endif %}
+            <div>
+                <dt>Status</dt>
+                <dd>{{ page.extra.status }}</dd>
+            </div>
+        </dl>
+
+        <div class="document-actions">
+            <a class="button-secondary" href="{{ page.extra.source_url }}"
+                >View canonical source</a
+            >
+            <button class="button-secondary copy-link" type="button">
+                Copy link
+            </button>
+        </div>
     </header>
 
     <div class="document-layout">
-      {% if page.toc %}
+        {% if page.toc %}
         <details class="mobile-toc">
-          <summary>On this page</summary>
-          <nav aria-label="On this page">
-            <ol>
-              {% for heading in page.toc %}
-                <li>
-                  <a href="#{{ heading.id }}">{{ heading.title }}</a>
-                  {% if heading.children %}
-                    <ol>
-                      {% for child in heading.children %}
-                        <li><a href="#{{ child.id }}">{{ child.title }}</a></li>
-                      {% endfor %}
-                    </ol>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ol>
-          </nav>
-        </details>
-      {% endif %}
-
-      <article class="prose" data-search-body>
-        {{ page.content | safe }}
-      </article>
-
-      {% if page.toc %}
-        <aside class="toc" aria-label="On this page">
-          <p>On this page</p>
-          <ol>
-            {% for heading in page.toc %}
-              <li>
-                <a href="#{{ heading.id }}">{{ heading.title }}</a>
-                {% if heading.children %}
-                  <ol>
-                    {% for child in heading.children %}
-                      <li><a href="#{{ child.id }}">{{ child.title }}</a></li>
+            <summary>On this page</summary>
+            <nav aria-label="On this page">
+                <ol>
+                    {% for heading in page.toc %}
+                    <li>
+                        <a href="#{{ heading.id }}">{{ heading.title }}</a>
+                        {% if heading.children %}
+                        <ol>
+                            {% for child in heading.children %}
+                            <li>
+                                <a href="#{{ child.id }}">{{ child.title }}</a>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                        {% endif %}
+                    </li>
                     {% endfor %}
-                  </ol>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ol>
+                </ol>
+            </nav>
+        </details>
+        {% endif %}
+
+        <article class="prose" data-search-body>
+            {{ page.content | safe }}
+        </article>
+
+        {% if page.toc %}
+        <aside class="toc" aria-label="On this page">
+            <p>On this page</p>
+            <ol>
+                {% for heading in page.toc %}
+                <li>
+                    <a href="#{{ heading.id }}">{{ heading.title }}</a>
+                    {% if heading.children %}
+                    <ol>
+                        {% for child in heading.children %}
+                        <li><a href="#{{ child.id }}">{{ child.title }}</a></li>
+                        {% endfor %}
+                    </ol>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ol>
         </aside>
-      {% endif %}
+        {% endif %}
     </div>
 
     {% if page.extra.is_companion %}
-      <div class="companion-return">
-        <a href="{{ page.extra.parent_url }}">← Return to {{ page.extra.label }}: {{ page.extra.parent_title }}</a>
-      </div>
-    {% endif %}
-  </div>
+    <div class="companion-return">
+        <a href="{{ page.extra.parent_url }}"
+            >← Return to {{ page.extra.label }}: {{ page.extra.parent_title
+            }}</a
+        >
+    </div>
+    {% endif %} {% if not page.extra.is_companion %} {% set collection =
+    get_section(path="_index.md") %} {% set_global has_companions = false %} {%
+    for document in collection.pages %}{% if document.extra.number ==
+    page.extra.number and document.extra.is_companion %}{% set_global
+    has_companions = true %}{% endif %}{% endfor %} {% if has_companions %}
+    <section class="related-documents" aria-labelledby="companion-title">
+        <h2 id="companion-title">Companion documents</h2>
+        <ul>
+            {% for document in collection.pages %}{% if document.extra.number ==
+            page.extra.number and document.extra.is_companion %}
+            <li>
+                <a href="{{ document.path }}"
+                    >{{ document.extra.short_title }}</a
+                >
+                <p>{{ document.description }}</p>
+            </li>
+            {% endif %}{% endfor %}
+        </ul>
+    </section>
+    {% endif %} {% endif %}
+</div>
 {% endblock content %}

@@ -1,0 +1,90 @@
+[kip-0001]
+slug = "kip-1-kaspa-rust-rewrite"
+description = "Kaspa KIP 1 describes the Rust full-node rewrite, its performance goals, and the architecture needed for future network upgrades."
+
+[kip-0002]
+slug = "kip-2-dagknight-consensus"
+description = "Kaspa KIP 2 proposes upgrading consensus to DAGKNIGHT, including research, implementation goals, and wallet confirmation-policy support."
+
+[kip-0003]
+slug = "kip-3-daa-block-sampling"
+description = "Kaspa KIP 3 explores block sampling for difficulty adjustment at higher block rates. Read the proposal, its rationale, and recorded status."
+
+[kip-0004]
+slug = "kip-4-sparse-difficulty-windows"
+description = "Kaspa KIP 4 specifies sparse difficulty windows to reduce difficulty-adjustment overhead as the network's block rate increases."
+
+[kip-0005]
+slug = "kip-5-message-signing"
+description = "Kaspa KIP 5 specifies message signing and verification so applications can demonstrate access to an address without revealing private keys."
+
+[kip-0006]
+slug = "kip-6-proof-of-chain-membership"
+description = "Kaspa KIP 6 explores proof of chain membership (PoChM), allowing chain inclusion to be verified after the underlying data has been pruned."
+
+[kip-0009]
+slug = "kip-9-storage-mass"
+description = "Kaspa KIP 9 extends the transaction mass formula to account for UTXO storage costs and mitigate persistent state bloat."
+
+[kip-0010]
+slug = "kip-10-transaction-opcodes"
+description = "Kaspa KIP 10 specifies transaction introspection opcodes that extend script functionality and enable additional spending constraints."
+
+[kip-0013]
+slug = "kip-13-transient-storage"
+description = "Kaspa KIP 13 proposes tracking transient transaction storage as mass to bound block size, bandwidth, and node resource consumption."
+
+[kip-0014]
+slug = "kip-14-crescendo-hardfork"
+description = "Kaspa KIP 14 specifies the Crescendo hardfork, the transition to 10 blocks per second, and the accompanying consensus changes."
+
+[kip-0015]
+slug = "kip-15-transaction-ordering"
+description = "Kaspa KIP 15 specifies canonical transaction ordering and sequencing commitments for accepted transactions. Read the technical proposal and status."
+
+[kip-0016]
+slug = "kip-16-verifiable-computation"
+description = "Kaspa KIP 16 specifies script opcodes for verifiable computation and on-chain proof verification, including the ZK precompile."
+
+[kip-0017]
+slug = "kip-17-covenants-and-scripting"
+description = "Kaspa KIP 17 extends covenant support through transaction introspection and byte-string scripting primitives for validating UTXO state transitions."
+
+[kip-0020]
+slug = "kip-20-covenant-ids"
+description = "Kaspa KIP 20 specifies consensus-tracked covenant identifiers for stable lineage across UTXO transitions and covenant membership checks."
+
+[kip-0021]
+slug = "kip-21-partitioned-sequencing"
+description = "Kaspa KIP 21 specifies partitioned sequencing commitments so application-lane proofs can scale with relevant activity rather than total throughput."
+
+["kip-0021/impl-spec"]
+description = "Reserved KIP 21 companion for Kaspa implementation notes on incremental state maintenance, pruning, reorgs, and synchronization."
+
+["kip-0021/proving-spec"]
+description = "KIP 21 proving companion for Kaspa application lanes: witnesses, lane proofs, inactivity proofs, and proving algorithms."
+
+["kip-0021/seqcommit-accessor"]
+description = "KIP 21 accessor companion explaining Kaspa's OpChainblockSeqCommit, selected-parent context, depth thresholds, and reorganization behavior."
+
+[kcc-0000]
+slug = "kcc-0-purpose-and-guidelines"
+description = "Kaspa KCC 0 describes the purpose, submission format, review process, and lifecycle of Kaspa Calls for Conventions."
+
+[kcc-0001]
+slug = "kcc-1-covenant-concepts-and-abi"
+description = "Kaspa KCC 1 defines covenant concepts, value layouts, entrypoints, and Program ABI conventions for interoperable ecosystem implementations."
+
+[kcc-0002]
+slug = "kcc-2-authority-schemes"
+description = "Kaspa KCC 2 specifies authority schemes for Program ABIs, including identifiers, value encodings, and the meaning of authority checks."
+
+["kcc-0002/reference-code"]
+description = "Non-normative Kaspa KCC 2 reference code illustrating authority checks in Silverscript and Argent, alongside the authority-scheme specification."
+
+[kcc-0020]
+slug = "kcc-20-fungible-token-covenant"
+description = "Kaspa KCC 20 specifies a fungible-token covenant convention covering token state, transfer interfaces, and borrowed-receive authorization."
+
+["kcc-0020/borrowed-receive-authorization"]
+description = "Kaspa KCC 20 companion explaining borrowed-receive authorization and its relationship to fungible-token covenant rules."

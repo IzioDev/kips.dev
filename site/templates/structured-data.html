@@ -1,0 +1,3 @@
+{% component seo.json(value) %}{{ value | json_encode | replace(from="<",
+to="\\u003c") | replace(from=">", to="\\u003e") | replace(from="&",
+to="\\u0026") | safe }}{% endcomponent seo.json %}
