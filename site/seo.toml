@@ -88,3 +88,7 @@ description = "Kaspa KCC 20 specifies a fungible-token covenant convention cover
 
 ["kcc-0020/borrowed-receive-authorization"]
 description = "Kaspa KCC 20 companion explaining borrowed-receive authorization and its relationship to fungible-token covenant rules."
+
+[kcc-0023]
+slug = "kcc-23-mj-metadata-json"
+description = "Kaspa KCC 23: MJ: Metadata JSON. Read the specification and proposal status."
